@@ -57,9 +57,10 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             BluetoothDevice device = result.getDevice();
+
+            int rssi = result.getRssi(); //
             if (!deviceList.contains(device)) {
-                deviceList.add(device);
-                setUpData(deviceList);
+                adapter.addDevice(device, rssi);
             }
         }
     };
@@ -83,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
         initializeVariables();
         checkPermission();
         setUpRecyclerView();
-        setUpData(deviceList);
+        //  setUpData(deviceList);
 
 
     }
@@ -98,9 +99,9 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
     }
 
-    private void setUpData(List<BluetoothDevice> articles) {
+    private void setUpData(List<BluetoothDevice> articles, int rssi) {
 
-        adapter.setDataList(articles);
+
     }
 
 

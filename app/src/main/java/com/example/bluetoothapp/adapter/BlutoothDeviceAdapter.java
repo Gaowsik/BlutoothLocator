@@ -12,9 +12,11 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bluetoothapp.R;
+import com.example.bluetoothapp.model.BluetoothDeviceInfo;
 import com.example.bluetoothapp.model.BlutoothDevice;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class BlutoothDeviceAdapter extends RecyclerView.Adapter<BlutoothDeviceAdapter.BlutoothDeviceViewHolder> {
@@ -22,11 +24,11 @@ public class BlutoothDeviceAdapter extends RecyclerView.Adapter<BlutoothDeviceAd
 
     private List<BluetoothDevice> dataList;
     private Context context;
-    private AdapterOnClickListener<BlutoothDevice> adapterItemTypeOnClickListener;
 
-    public interface AdapterOnClickListener<T> {
-        void onItemSelected(T item);
-    }
+
+    private List<BluetoothDeviceInfo> deviceList  = new ArrayList<>();
+
+
 
     public BlutoothDeviceAdapter(Context context) {
         this.context = context;
@@ -59,6 +61,26 @@ public class BlutoothDeviceAdapter extends RecyclerView.Adapter<BlutoothDeviceAd
         }
     }
 
+
+    public void addDevice(BluetoothDevice device, int rssi) {
+      //  BluetoothDeviceInfo deviceInfo = new BluetoothDeviceInfo(device, rssi);
+
+
+        for (BluetoothDeviceInfo existingDevice : deviceList) {
+            if (existingDevice.getDevice().getAddress().equals(device.getAddress())) {
+                // Update the existing device's RSSI value and notify the change
+                existingDevice.setRssi(rssi);
+                notifyDataSetChanged();
+                return;
+            }
+        }
+
+        // If the device is not in the list, add it as a new entry
+        BluetoothDeviceInfo deviceInfo = new BluetoothDeviceInfo(device, rssi);
+        deviceList.add(deviceInfo);
+        notifyDataSetChanged();
+    }
+
     @Override
     public BlutoothDeviceAdapter.BlutoothDeviceViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
@@ -70,22 +92,22 @@ public class BlutoothDeviceAdapter extends RecyclerView.Adapter<BlutoothDeviceAd
     @Override
     public void onBindViewHolder(@NonNull BlutoothDeviceViewHolder holder, int position) {
 
-        final BluetoothDevice currentItem = (BluetoothDevice) dataList.get(position);
-        if (currentItem.getName()==null){
+        final BluetoothDeviceInfo currentItem = (BluetoothDeviceInfo) deviceList.get(position);
+        if (currentItem.getDevice().getName()==null){
             holder.textName.setText("Unknown");
         } else {
-            holder.textName.setText(currentItem.getName());
+            holder.textName.setText(currentItem.getDevice().getName());
         }
 
-        if(currentItem.getUuids()==null){
+        if(currentItem.getDevice().getUuids()==null){
             holder.textUUID.setText("Unknown");
         }
         else {
-            holder.textUUID.setText(currentItem.getUuids().toString());
+            holder.textUUID.setText(Arrays.toString(currentItem.getDevice().getUuids()));
         }
 
 
-        holder.textRssi.setText("-82");
+        holder.textRssi.setText(Integer.toString(currentItem.getRssi()));
         holder.textArea.setText("Rooms");
 
     }
@@ -93,7 +115,7 @@ public class BlutoothDeviceAdapter extends RecyclerView.Adapter<BlutoothDeviceAd
 
     @Override
     public int getItemCount() {
-        return dataList.size();
+        return deviceList.size();
     }
 
 

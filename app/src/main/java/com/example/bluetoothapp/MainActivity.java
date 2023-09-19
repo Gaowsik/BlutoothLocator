@@ -3,6 +3,7 @@ package com.example.bluetoothapp;
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.Manifest.permission.BLUETOOTH_ADMIN;
+import static android.Manifest.permission.BLUETOOTH_CONNECT;
 import static android.Manifest.permission.BLUETOOTH_SCAN;
 
 import androidx.annotation.NonNull;
@@ -12,7 +13,16 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.annotation.SuppressLint;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanResult;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -27,17 +37,32 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CODE = 123;
-
-    private BluetoothLeScanner bluetoothLeScanner;
-
+    private static final int REQUEST_ENABLE_BT = 1;
     private BlutoothDeviceAdapter adapter;
+    private BluetoothAdapter bluetoothAdapter;
 
     private RecyclerView recyclerView;
+
+    private List<BluetoothDevice> deviceList = new ArrayList<>();
+    private BluetoothLeScanner bluetoothLeScanner;
+
     private boolean scanning;
-    private Handler handler;
+
 
     // Stops scanning after 10 seconds.
     private static final long SCAN_PERIOD = 10000;
+
+
+    private final ScanCallback scanCallback = new ScanCallback() {
+        @Override
+        public void onScanResult(int callbackType, ScanResult result) {
+            BluetoothDevice device = result.getDevice();
+            if (!deviceList.contains(device)) {
+                deviceList.add(device);
+                setUpData(deviceList);
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,30 +70,26 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         init();
 
+
     }
 
     private void initializeVariables() {
-
-        handler = new Handler();
         recyclerView = findViewById(R.id.recycle_nearby_div);
         adapter = new BlutoothDeviceAdapter(this);
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     }
 
     private void init() {
         initializeVariables();
         checkPermission();
         setUpRecyclerView();
-        setUpData(bleDevices);
+        setUpData(deviceList);
 
 
     }
 
 
-    List<BlutoothDevice> bleDevices = new ArrayList<>(Arrays.asList(
-            new BlutoothDevice("Device 1", -50, new byte[]{0x01, 0x02, 0x03},"Room"),
-            new BlutoothDevice("Device 2", -60,new byte[]{0x01, 0x02, 0x03}, "Room"),
-            new BlutoothDevice("Device 3",-70,new byte[]{0x01, 0x02, 0x03}, "Room")
-    ));
+    List<BlutoothDevice> bleDevices = new ArrayList<>(Arrays.asList(new BlutoothDevice("Device 1", -50, new byte[]{0x01, 0x02, 0x03}, "Room"), new BlutoothDevice("Device 2", -60, new byte[]{0x01, 0x02, 0x03}, "Room"), new BlutoothDevice("Device 3", -70, new byte[]{0x01, 0x02, 0x03}, "Room")));
 
     private void setUpRecyclerView() {
 
@@ -77,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
     }
 
-    private void setUpData(List<BlutoothDevice> articles) {
+    private void setUpData(List<BluetoothDevice> articles) {
 
         adapter.setDataList(articles);
     }
@@ -87,7 +108,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Check if you have already been granted these permissions.
         if (checkPermissions()) {
-            // Permissions are already granted. You can proceed with your Bluetooth operations.
+            startScanning();
+
         } else {
             // Permissions are not granted. Request them.
             requestPermissions();
@@ -102,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void requestPermissions() {
-        ActivityCompat.requestPermissions(this, new String[]{BLUETOOTH_SCAN, ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION, BLUETOOTH_ADMIN}, PERMISSION_REQUEST_CODE);
+        ActivityCompat.requestPermissions(this, new String[]{BLUETOOTH_SCAN, ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION, BLUETOOTH_ADMIN, BLUETOOTH_CONNECT}, PERMISSION_REQUEST_CODE);
     }
 
     // Handle the result of the permission request.
@@ -124,10 +146,34 @@ public class MainActivity extends AppCompatActivity {
 
             if (allPermissionsGranted) {
                 Toast.makeText(this, "Permissions are granted succussfully", Toast.LENGTH_SHORT).show();
+
+
             } else {
                 Toast.makeText(this, "All the permissions should be granted in order to use this app", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+
+    @SuppressLint("MissingPermission")
+    private void startScanning() {
+        bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
+        if (bluetoothLeScanner != null) {
+            bluetoothLeScanner.startScan(scanCallback);
+        } else {
+            Toast.makeText(this, "BLE scanning not supported on this device", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+    @SuppressLint("MissingPermission")
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (bluetoothLeScanner != null) {
+            bluetoothLeScanner.stopScan(scanCallback);
+        }
+
     }
 }
 

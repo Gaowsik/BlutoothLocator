@@ -1,5 +1,7 @@
 package com.example.bluetoothapp.adapter;
 
+import android.annotation.SuppressLint;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,7 +20,7 @@ import java.util.List;
 public class BlutoothDeviceAdapter extends RecyclerView.Adapter<BlutoothDeviceAdapter.BlutoothDeviceViewHolder> {
 
 
-    private List<BlutoothDevice> dataList;
+    private List<BluetoothDevice> dataList;
     private Context context;
     private AdapterOnClickListener<BlutoothDevice> adapterItemTypeOnClickListener;
 
@@ -32,7 +34,7 @@ public class BlutoothDeviceAdapter extends RecyclerView.Adapter<BlutoothDeviceAd
 
     }
 
-    public void setDataList(List<BlutoothDevice> dataList) {
+    public void setDataList(List<BluetoothDevice> dataList) {
         this.dataList.clear();
         this.dataList.addAll(dataList);
         notifyDataSetChanged();
@@ -45,12 +47,15 @@ public class BlutoothDeviceAdapter extends RecyclerView.Adapter<BlutoothDeviceAd
         TextView textRssi;
         TextView textArea;
 
+        TextView textUUID;
+
         BlutoothDeviceViewHolder(View itemView) {
             super(itemView);
 
             textName = itemView.findViewById(R.id.text_name);
             textRssi = itemView.findViewById(R.id.text_rssi);
             textArea = itemView.findViewById(R.id.text_area);
+            textUUID = itemView.findViewById(R.id.text_uuid);
         }
     }
 
@@ -61,12 +66,26 @@ public class BlutoothDeviceAdapter extends RecyclerView.Adapter<BlutoothDeviceAd
         return new BlutoothDeviceAdapter.BlutoothDeviceViewHolder(view);
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public void onBindViewHolder(@NonNull BlutoothDeviceViewHolder holder, int position) {
 
-        final BlutoothDevice currentItem = (BlutoothDevice) dataList.get(position);
-        holder.textName.setText(dataList.get(position).getName());
-        holder.textRssi.setText(dataList.get(position).getRssi());
+        final BluetoothDevice currentItem = (BluetoothDevice) dataList.get(position);
+        if (currentItem.getName()==null){
+            holder.textName.setText("Unknown");
+        } else {
+            holder.textName.setText(currentItem.getName());
+        }
+
+        if(currentItem.getUuids()==null){
+            holder.textUUID.setText("Unknown");
+        }
+        else {
+            holder.textUUID.setText(currentItem.getUuids().toString());
+        }
+
+
+        holder.textRssi.setText("-82");
         holder.textArea.setText("Rooms");
 
     }

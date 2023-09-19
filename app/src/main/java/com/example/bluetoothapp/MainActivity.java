@@ -19,23 +19,19 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.bluetoothapp.adapter.BlutoothDeviceAdapter;
-import com.example.bluetoothapp.model.BlutoothDevice;
+import com.example.bluetoothapp.model.BluetoothDeviceInfo;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements BlutoothDeviceAdapter.AdapterOnClickListener<BluetoothDeviceInfo> {
     private static final int PERMISSION_REQUEST_CODE = 123;
     private static final int REQUEST_ENABLE_BT = 1;
     private BlutoothDeviceAdapter adapter;
@@ -46,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
     private List<BluetoothDevice> deviceList = new ArrayList<>();
     private BluetoothLeScanner bluetoothLeScanner;
 
+    private TextView textNearByDevice;
+
     private boolean scanning;
 
 
@@ -53,14 +51,29 @@ public class MainActivity extends AppCompatActivity {
     private static final long SCAN_PERIOD = 10000;
 
 
+    Handler handler = new Handler();
+    Runnable refreshRunnable = new Runnable() {
+        @Override
+        public void run() {
+            // Refresh your data source and notify the adapter
+            adapter.refresh();
+
+            // Schedule the next refresh after 10 seconds
+            handler.postDelayed(this, 10000);
+
+        }
+    };
+
+
     private final ScanCallback scanCallback = new ScanCallback() {
+        @SuppressLint("MissingPermission")
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             BluetoothDevice device = result.getDevice();
-
             int rssi = result.getRssi(); //
             if (!deviceList.contains(device)) {
-                adapter.addDevice(device, rssi);
+                //     UUID uuid = uuids[0].getUuid();
+                adapter.addDevice(device, rssi, "unaccesible");
             }
         }
     };
@@ -70,14 +83,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         init();
+        // Start the periodic refresh
+        handler.postDelayed(refreshRunnable, 10000);
 
 
     }
 
     private void initializeVariables() {
         recyclerView = findViewById(R.id.recycle_nearby_div);
-        adapter = new BlutoothDeviceAdapter(this);
+        adapter = new BlutoothDeviceAdapter(this, this);
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        textNearByDevice = findViewById(R.id.text_nearby_devices);
     }
 
     private void init() {
@@ -90,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    List<BlutoothDevice> bleDevices = new ArrayList<>(Arrays.asList(new BlutoothDevice("Device 1", -50, new byte[]{0x01, 0x02, 0x03}, "Room"), new BlutoothDevice("Device 2", -60, new byte[]{0x01, 0x02, 0x03}, "Room"), new BlutoothDevice("Device 3", -70, new byte[]{0x01, 0x02, 0x03}, "Room")));
+    // List<BlutoothDevice> bleDevices = new ArrayList<>(Arrays.asList(new BlutoothDevice("Device 1", -50, new byte[]{0x01, 0x02, 0x03}, "Room"), new BlutoothDevice("Device 2", -60, new byte[]{0x01, 0x02, 0x03}, "Room"), new BlutoothDevice("Device 3", -70, new byte[]{0x01, 0x02, 0x03}, "Room")));
 
     private void setUpRecyclerView() {
 
@@ -175,6 +191,12 @@ public class MainActivity extends AppCompatActivity {
             bluetoothLeScanner.stopScan(scanCallback);
         }
 
+    }
+
+    @SuppressLint("MissingPermission")
+    @Override
+    public void onItemSelected(BluetoothDeviceInfo item) {
+        textNearByDevice.setText("you are near to the " + item.getDevice().getName() + "device");
     }
 }
 

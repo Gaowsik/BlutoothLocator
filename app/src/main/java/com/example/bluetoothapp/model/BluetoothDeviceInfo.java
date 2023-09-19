@@ -16,9 +16,18 @@ public class BluetoothDeviceInfo {
 
     private String uuid;
 
-    public BluetoothDeviceInfo(BluetoothDevice device, int rssi) {
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public BluetoothDeviceInfo(BluetoothDevice device, int rssi, String uuid) {
         this.device = device;
         this.rssi = rssi;
+        this.uuid = uuid;
     }
 
     public BluetoothDevice getDevice() {

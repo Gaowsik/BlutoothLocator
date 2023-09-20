@@ -6,6 +6,8 @@ import static android.Manifest.permission.BLUETOOTH_ADMIN;
 import static android.Manifest.permission.BLUETOOTH_CONNECT;
 import static android.Manifest.permission.BLUETOOTH_SCAN;
 
+import static com.example.bluetoothapp.Utils.getNameArea;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -59,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
             adapter.refresh();
 
             // Schedule the next refresh after 10 seconds
-            handler.postDelayed(this, 10000);
+            handler.postDelayed(this, SCAN_PERIOD);
 
         }
     };
@@ -126,7 +128,6 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
         // Check if you have already been granted these permissions.
         if (checkPermissions()) {
             startScanning();
-
         } else {
             // Permissions are not granted. Request them.
             requestPermissions();
@@ -196,7 +197,8 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
     @SuppressLint("MissingPermission")
     @Override
     public void onItemSelected(BluetoothDeviceInfo item) {
-        textNearByDevice.setText("you are near to the " + item.getDevice().getName() + "device");
+            textNearByDevice.setText("you are at the " + getNameArea(item));
+
     }
 }
 

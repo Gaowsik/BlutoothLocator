@@ -1,5 +1,7 @@
 package com.example.bluetoothapp.adapter;
 
+import static com.example.bluetoothapp.Utils.getNameArea;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
@@ -29,12 +31,14 @@ public class BlutoothDeviceAdapter extends RecyclerView.Adapter<BlutoothDeviceAd
     private Context context;
 
     public interface AdapterOnClickListener<T> {
-        void onItemSelected(T item);}
+        void onItemSelected(T item);
+    }
+
     private AdapterOnClickListener<BluetoothDeviceInfo> adapterItemTypeOnClickListener;
     private List<BluetoothDeviceInfo> deviceList = new ArrayList<>();
 
 
-    public BlutoothDeviceAdapter(Context context,AdapterOnClickListener<BluetoothDeviceInfo> adapterItemTypeOnClickListener) {
+    public BlutoothDeviceAdapter(Context context, AdapterOnClickListener<BluetoothDeviceInfo> adapterItemTypeOnClickListener) {
         this.context = context;
         dataList = new ArrayList<>();
         this.adapterItemTypeOnClickListener = adapterItemTypeOnClickListener;
@@ -90,8 +94,9 @@ public class BlutoothDeviceAdapter extends RecyclerView.Adapter<BlutoothDeviceAd
             deviceList.add(deviceInfo);
             notifyDataSetChanged();
         }
-
-        adapterItemTypeOnClickListener.onItemSelected(getDeviceWithHighestRssi(deviceList));
+        if (!deviceList.isEmpty()) {
+            adapterItemTypeOnClickListener.onItemSelected(getDeviceWithHighestRssi(deviceList));
+        }
     }
 
 
@@ -123,7 +128,8 @@ public class BlutoothDeviceAdapter extends RecyclerView.Adapter<BlutoothDeviceAd
 
 
         holder.textRssi.setText(Integer.toString(currentItem.getRssi()));
-        holder.textArea.setText("Rooms");
+        holder.textArea.setText(getNameArea(currentItem));
+
 
     }
 

@@ -52,8 +52,7 @@ public class BlutoothDeviceAdapter extends RecyclerView.Adapter<BlutoothDeviceAd
     }
 
     public void refresh() {
-        this.dataList.clear();
-        notifyDataSetChanged();
+        this.deviceList.clear();
     }
 
     class BlutoothDeviceViewHolder extends RecyclerView.ViewHolder {
@@ -74,28 +73,46 @@ public class BlutoothDeviceAdapter extends RecyclerView.Adapter<BlutoothDeviceAd
             textUUID = itemView.findViewById(R.id.text_uuid);
         }
     }
+    public void updateAverageRssi(String deviceAddress, int averageRssi) {
+        for (BluetoothDeviceInfo deviceInfo : deviceList) {
+            if (deviceInfo.getDevice().getAddress().equals(deviceAddress)) {
+                deviceInfo.setRssi(averageRssi);
+                notifyDataSetChanged();
+                break;
+            }
+        }
 
+        if (!deviceList.isEmpty()) {
+            adapterItemTypeOnClickListener.onItemSelected(getDeviceWithHighestRssi(deviceList));
+        }
+    }
+
+    public boolean containsDevice(String deviceAddress) {
+        for (BluetoothDeviceInfo deviceInfo : deviceList) {
+            if (deviceInfo.getDevice().getAddress().equals(deviceAddress)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public void addDevice(BluetoothDevice device, int rssi, String uuid) {
 
         @SuppressLint("MissingPermission") String deviceName = device.getName();
         if (deviceName != null && (deviceName.equals("00000534") || deviceName.equals("00000523") || deviceName.equals("00000525"))) {
-            for (BluetoothDeviceInfo existingDevice : deviceList) {
+/*            for (BluetoothDeviceInfo existingDevice : deviceList) {
                 if (existingDevice.getDevice().getAddress().equals(device.getAddress())) {
                     // Update the existing device's RSSI value and notify the change
                     existingDevice.setRssi(rssi);
                     notifyDataSetChanged();
                     return;
                 }
-            }
+            }*/
             List<DeviceInfoModel> listdata = new ArrayList<>(Arrays.asList(new DeviceInfoModel(534, 00000534, "00000534-91D8-4115-BB09-F76BAF6A0E7F", "Office room"), new DeviceInfoModel(523, 00000523, "00000523-91D8-4115-BB09-F76BAF6A0E7F", "reception"), new DeviceInfoModel(525, 00000525, "00000525-91D8-4115-BB09-F76BAF6A0E7F", "Lunch room")));
             // If the device is not in the list, add it as a new entry
             BluetoothDeviceInfo deviceInfo = new BluetoothDeviceInfo(device, rssi, uuid);
             deviceList.add(deviceInfo);
             notifyDataSetChanged();
-        }
-        if (!deviceList.isEmpty()) {
-            adapterItemTypeOnClickListener.onItemSelected(getDeviceWithHighestRssi(deviceList));
         }
     }
 

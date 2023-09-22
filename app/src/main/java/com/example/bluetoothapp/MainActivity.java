@@ -6,6 +6,7 @@ import static android.Manifest.permission.BLUETOOTH_ADMIN;
 import static android.Manifest.permission.BLUETOOTH_CONNECT;
 import static android.Manifest.permission.BLUETOOTH_SCAN;
 
+import static com.example.bluetoothapp.Utils.getDevices;
 import static com.example.bluetoothapp.Utils.getNameArea;
 
 import androidx.annotation.NonNull;
@@ -97,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             BluetoothDevice device = result.getDevice();
-            String deviceAddress = device.getAddress();
+            String deviceAddress = device.getName();
             int rssi = result.getRssi(); //
             // Add the RSSI value to the list associated with this device
             List<Integer> rssiValues = rssiValuesMap.get(deviceAddress);
@@ -110,7 +111,6 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
             if (!adapter.containsDevice(deviceAddress) && (device.getName() != null)) {
                 if (device.getName().equals("00000534") || device.getName().equals("00000523") || device.getName().equals("00000525")) {
                     rssiValues.add(rssi);
-                    adapter.addDevice(device, rssi, "unaccessible");
                     rssiValuesMap.put(deviceAddress, rssiValues);
                     Log.d("MainActi", "value is added to the map " + deviceAddress + ": " + rssiValues);
                 }
@@ -142,7 +142,8 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
         initializeVariables();
         checkPermission();
         setUpRecyclerView();
-        //  setUpData(deviceList);
+        setUpDataToRecyclerview();
+        startScanning();
 
 
     }
@@ -151,15 +152,14 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
     // List<BlutoothDevice> bleDevices = new ArrayList<>(Arrays.asList(new BlutoothDevice("Device 1", -50, new byte[]{0x01, 0x02, 0x03}, "Room"), new BlutoothDevice("Device 2", -60, new byte[]{0x01, 0x02, 0x03}, "Room"), new BlutoothDevice("Device 3", -70, new byte[]{0x01, 0x02, 0x03}, "Room")));
 
     private void setUpRecyclerView() {
-
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
     }
 
-    private void setUpData(List<BluetoothDevice> articles, int rssi) {
+    private void setUpDataToRecyclerview() {
 
-
+        adapter.addDevice(getDevices());
     }
 
 

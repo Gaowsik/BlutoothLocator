@@ -27,7 +27,7 @@ import java.util.List;
 public class BlutoothDeviceAdapter extends RecyclerView.Adapter<BlutoothDeviceAdapter.BlutoothDeviceViewHolder> {
 
 
-    private List<BluetoothDevice> dataList;
+    private List<BluetoothDeviceInfo> dataList;
     private Context context;
 
     public interface AdapterOnClickListener<T> {
@@ -45,14 +45,14 @@ public class BlutoothDeviceAdapter extends RecyclerView.Adapter<BlutoothDeviceAd
 
     }
 
-    public void setDataList(List<BluetoothDevice> dataList) {
+    public void setDataList(List<BluetoothDeviceInfo> dataList) {
         this.dataList.clear();
         this.dataList.addAll(dataList);
         notifyDataSetChanged();
     }
 
     public void refresh() {
-        this.deviceList.clear();
+        this.dataList.clear();
     }
 
     class BlutoothDeviceViewHolder extends RecyclerView.ViewHolder {
@@ -75,7 +75,7 @@ public class BlutoothDeviceAdapter extends RecyclerView.Adapter<BlutoothDeviceAd
     }
     public void updateAverageRssi(String deviceAddress, int averageRssi) {
         for (BluetoothDeviceInfo deviceInfo : deviceList) {
-            if (deviceInfo.getDevice().getAddress().equals(deviceAddress)) {
+            if (deviceInfo.getDevice().getDeviceName().equals(deviceAddress)) {
                 deviceInfo.setRssi(averageRssi);
                 notifyDataSetChanged();
                 break;
@@ -88,33 +88,32 @@ public class BlutoothDeviceAdapter extends RecyclerView.Adapter<BlutoothDeviceAd
     }
 
     public boolean containsDevice(String deviceAddress) {
-        for (BluetoothDeviceInfo deviceInfo : deviceList) {
-            if (deviceInfo.getDevice().getAddress().equals(deviceAddress)) {
+        for (BluetoothDeviceInfo deviceInfo : dataList) {
+            if (deviceInfo.getDevice().getDeviceName().equals(deviceAddress)) {
                 return true;
             }
         }
         return false;
     }
 
-    public void addDevice(BluetoothDevice device, int rssi, String uuid) {
+    public void addDevice(List<BluetoothDeviceInfo> devices) {
 
-        @SuppressLint("MissingPermission") String deviceName = device.getName();
+/*        @SuppressLint("MissingPermission") String deviceName = device.getName();
         if (deviceName != null && (deviceName.equals("00000534") || deviceName.equals("00000523") || deviceName.equals("00000525"))) {
-/*            for (BluetoothDeviceInfo existingDevice : deviceList) {
+*//*            for (BluetoothDeviceInfo existingDevice : deviceList) {
                 if (existingDevice.getDevice().getAddress().equals(device.getAddress())) {
                     // Update the existing device's RSSI value and notify the change
                     existingDevice.setRssi(rssi);
                     notifyDataSetChanged();
                     return;
                 }
-            }*/
+            }*//*
             List<DeviceInfoModel> listdata = new ArrayList<>(Arrays.asList(new DeviceInfoModel(534, 00000534, "00000534-91D8-4115-BB09-F76BAF6A0E7F", "Office room"), new DeviceInfoModel(523, 00000523, "00000523-91D8-4115-BB09-F76BAF6A0E7F", "reception"), new DeviceInfoModel(525, 00000525, "00000525-91D8-4115-BB09-F76BAF6A0E7F", "Lunch room")));
-            // If the device is not in the list, add it as a new entry
-            BluetoothDeviceInfo deviceInfo = new BluetoothDeviceInfo(device, rssi, uuid);
-            deviceList.add(deviceInfo);
+            // If the device is not in the list, add it as a new entry*/
+
+            deviceList.addAll(devices);
             notifyDataSetChanged();
         }
-    }
 
 
     @Override
@@ -131,18 +130,14 @@ public class BlutoothDeviceAdapter extends RecyclerView.Adapter<BlutoothDeviceAd
         final BluetoothDeviceInfo currentItem = (BluetoothDeviceInfo) deviceList.get(position);
 
 
-        if (currentItem.getDevice().getName() == null) {
+        if (currentItem.getDevice().getDeviceName() == null) {
             holder.textName.setText("Unknown");
         } else {
-            holder.textName.setText(currentItem.getDevice().getName());
+            holder.textName.setText(currentItem.getDevice().getDeviceName());
         }
 
-        if (currentItem.getUuid() == null) {
+
             holder.textUUID.setText("Unknown");
-        } else {
-            holder.textUUID.setText(currentItem.getUuid());
-        }
-
 
         holder.textRssi.setText(Integer.toString(currentItem.getRssi()));
         holder.textArea.setText(getNameArea(currentItem));

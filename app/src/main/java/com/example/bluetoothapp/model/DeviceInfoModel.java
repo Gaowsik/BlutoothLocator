@@ -2,11 +2,12 @@ package com.example.bluetoothapp.model;
 
 public class DeviceInfoModel {
     int kfo;
-    int deviceName;
+    String deviceName;
     String uuid;
     String area;
 
-    public DeviceInfoModel(int kfo, int deviceName, String uuid, String area) {
+
+    public DeviceInfoModel(int kfo, String deviceName, String uuid, String area) {
         this.kfo = kfo;
         this.deviceName = deviceName;
         this.uuid = uuid;
@@ -21,11 +22,11 @@ public class DeviceInfoModel {
         this.kfo = kfo;
     }
 
-    public int getDeviceName() {
+    public String getDeviceName() {
         return deviceName;
     }
 
-    public void setDeviceName(int deviceName) {
+    public void setDeviceName(String deviceName) {
         this.deviceName = deviceName;
     }
 
@@ -44,4 +45,5 @@ public class DeviceInfoModel {
     public void setArea(String area) {
         this.area = area;
     }
+
 }

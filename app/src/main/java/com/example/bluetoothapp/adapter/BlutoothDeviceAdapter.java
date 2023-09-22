@@ -27,7 +27,7 @@ import java.util.List;
 public class BlutoothDeviceAdapter extends RecyclerView.Adapter<BlutoothDeviceAdapter.BlutoothDeviceViewHolder> {
 
 
-    private List<BluetoothDeviceInfo> dataList;
+    private List<BluetoothDevice> dataList;
     private Context context;
 
     public interface AdapterOnClickListener<T> {
@@ -45,9 +45,8 @@ public class BlutoothDeviceAdapter extends RecyclerView.Adapter<BlutoothDeviceAd
 
     }
 
-    public void setDataList(List<BluetoothDeviceInfo> dataList) {
-        this.dataList.clear();
-        this.dataList.addAll(dataList);
+    public void setDataList(BluetoothDevice dataList) {
+        this.dataList.add(dataList);
         notifyDataSetChanged();
     }
 
@@ -87,9 +86,10 @@ public class BlutoothDeviceAdapter extends RecyclerView.Adapter<BlutoothDeviceAd
         }
     }
 
+    @SuppressLint("MissingPermission")
     public boolean containsDevice(String deviceAddress) {
-        for (BluetoothDeviceInfo deviceInfo : dataList) {
-            if (deviceInfo.getDevice().getDeviceName().equals(deviceAddress)) {
+        for (BluetoothDevice deviceInfo : dataList) {
+            if (deviceInfo.getName().equals(deviceAddress)) {
                 return true;
             }
         }
@@ -159,7 +159,7 @@ public class BlutoothDeviceAdapter extends RecyclerView.Adapter<BlutoothDeviceAd
         BluetoothDeviceInfo highestRssiDevice = deviceList.get(0); // Initialize with the first device in the list
 
         for (BluetoothDeviceInfo deviceInfo : deviceList) {
-            if (deviceInfo.getRssi() > highestRssiDevice.getRssi()) {
+            if (deviceInfo.getRssi() > highestRssiDevice.getRssi() && deviceInfo.getRssi()!=0) {
                 highestRssiDevice = deviceInfo; // Update the device with the highest RSSI value
             }
         }

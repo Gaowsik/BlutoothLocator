@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
         @Override
         public void run() {
             // Refresh your data source and notify the adapter
-            calculateAndDisplayAverages();
+           calculateAndDisplayAverages();
 
             // Schedule the next refresh after 10 seconds
             averageResultHandler.postDelayed(this, AVERAGE_INTERVAL);
@@ -111,6 +111,24 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
             if (!adapter.containsDevice(deviceAddress) && (device.getName() != null)) {
                 if (device.getName().equals("00000534") || device.getName().equals("00000523") || device.getName().equals("00000525")) {
                     rssiValues.add(rssi);
+                    // Check if the list size is at its maximum (6)
+                    if (rssiValues.size() >
+                            6) {
+                        // Remove the last value (the sixth in the list)
+                        rssiValues.remove(rssiValues.size() - 1);
+                    }
+
+                    // Move all existing values one position to the right
+                    for (int i = rssiValues.size() - 1; i >= 0; i--) {
+                        if (i == 0) {
+                            // Set the first position with the new RSSI value
+                            rssiValues.set(i, rssi);
+                        } else {
+                            // Move the previous value to the next position
+                            rssiValues.set(i, rssiValues.get(i - 1));
+                        }
+                    }
+                    adapter.setDataList(device);
                     rssiValuesMap.put(deviceAddress, rssiValues);
                     Log.d("MainActi", "value is added to the map " + deviceAddress + ": " + rssiValues);
                 }
@@ -253,7 +271,7 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
             String deviceAddress = entry.getKey();
             List<Integer> rssiValues = entry.getValue();
             Log.d("MainActi", "Average values" + deviceAddress + " countRssi" + rssiValues.size());
-            if (!rssiValues.isEmpty()) {
+            if (rssiValues.size() == 6) {
                 int sum = 0;
                 for (int rssi : rssiValues) {
                     sum += rssi;
@@ -264,7 +282,6 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
                 Log.d("MainActi", "Average values" + deviceAddress + " avgRssi" + averageRssi);
             }
         }
-        rssiValuesMap.clear();
     }
 
 

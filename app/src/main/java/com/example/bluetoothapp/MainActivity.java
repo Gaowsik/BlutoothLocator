@@ -33,6 +33,7 @@ import android.widget.Toast;
 
 import com.example.bluetoothapp.adapter.BlutoothDeviceAdapter;
 import com.example.bluetoothapp.model.BluetoothDeviceInfo;
+import com.example.bluetoothapp.model.RssiValueHolder;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
 
     private TextView textNearByDevice;
 
-    private Map<String, List<Integer>> rssiValuesMap;
+    private Map<String, RssiValueHolder> rssiValuesMap;
 
     private final long SCAN_INTERVAL = 5000; // 5 seconds
     private final long AVERAGE_INTERVAL = 30000; // 30 second
@@ -84,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
         @Override
         public void run() {
             // Refresh your data source and notify the adapter
-           calculateAndDisplayAverages();
+            //calculateAndDisplayAverages();
 
             // Schedule the next refresh after 10 seconds
             averageResultHandler.postDelayed(this, AVERAGE_INTERVAL);
@@ -99,9 +100,14 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
         public void onScanResult(int callbackType, ScanResult result) {
             BluetoothDevice device = result.getDevice();
             String deviceAddress = device.getName();
+
             int rssi = result.getRssi(); //
             // Add the RSSI value to the list associated with this device
-            List<Integer> rssiValues = rssiValuesMap.get(deviceAddress);
+            RssiValueHolder rssiValueHolder = rssiValuesMap.get(deviceAddress);
+            List<Integer> rssiValues = null;
+            if (rssiValueHolder != null) {
+                rssiValues = rssiValueHolder.getRssiValues();
+            }
             if (rssiValues == null) {
                 rssiValues = new ArrayList<>();
                 // rssiValuesMap.put(deviceAddress, rssiValues);
@@ -129,7 +135,16 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
                         }
                     }
                     adapter.setDataList(device);
-                    rssiValuesMap.put(deviceAddress, rssiValues);
+                    RssiValueHolder rssiValueViewholder = rssiValuesMap.get(deviceAddress);
+
+                    if (rssiValueViewholder == null) {
+                        rssiValueViewholder = new RssiValueHolder();
+                        rssiValuesMap.put(deviceAddress, rssiValueViewholder);
+                    }
+
+                    rssiValueViewholder.setRssiValues(rssiValues);
+                    //  rssiValuesMap.put(deviceAddress, rssiValueViewholder);
+                    calculateAndDisplayAverages();
                     Log.d("MainActi", "value is added to the map " + deviceAddress + ": " + rssiValues);
                 }
 
@@ -267,11 +282,12 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
     }
 
     private void calculateAndDisplayAverages() {
-        for (Map.Entry<String, List<Integer>> entry : rssiValuesMap.entrySet()) {
+        for (Map.Entry<String, RssiValueHolder> entry : rssiValuesMap.entrySet()) {
             String deviceAddress = entry.getKey();
-            List<Integer> rssiValues = entry.getValue();
-            Log.d("MainActi", "Average values" + deviceAddress + " countRssi" + rssiValues.size());
-            if (rssiValues.size() == 6) {
+            RssiValueHolder rssiValueHolderValue = entry.getValue();
+            List<Integer> rssiValues = rssiValueHolderValue.getRssiValues();
+            Log.d("MainActi", "Average values" + deviceAddress + " countRssi " + rssiValueHolderValue.getCount());
+            if (rssiValueHolderValue.getCount() == 6) {
                 int sum = 0;
                 for (int rssi : rssiValues) {
                     sum += rssi;
@@ -280,6 +296,7 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
                 int averageRssi = sum / rssiValues.size();
                 adapter.updateAverageRssi(deviceAddress, averageRssi);
                 Log.d("MainActi", "Average values" + deviceAddress + " avgRssi" + averageRssi);
+                rssiValueHolderValue.setCount(0);
             }
         }
     }

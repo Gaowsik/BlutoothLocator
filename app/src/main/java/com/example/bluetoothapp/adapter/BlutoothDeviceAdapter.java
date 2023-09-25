@@ -22,6 +22,8 @@ import com.example.bluetoothapp.model.DeviceInfoModel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class BlutoothDeviceAdapter extends RecyclerView.Adapter<BlutoothDeviceAdapter.BlutoothDeviceViewHolder> {
@@ -76,6 +78,7 @@ public class BlutoothDeviceAdapter extends RecyclerView.Adapter<BlutoothDeviceAd
         for (BluetoothDeviceInfo deviceInfo : deviceList) {
             if (deviceInfo.getDevice().getDeviceName().equals(deviceAddress)) {
                 deviceInfo.setRssi(averageRssi);
+                sortDeviceListByRssiDescendingWithZeroAtEnd();
                 notifyDataSetChanged();
                 break;
             }
@@ -165,6 +168,44 @@ public class BlutoothDeviceAdapter extends RecyclerView.Adapter<BlutoothDeviceAd
         }
 
         return highestRssiDevice;
+    }
+
+    public void sortDeviceListByRssi() {
+        Collections.sort(deviceList, new Comparator<BluetoothDeviceInfo>() {
+            @Override
+            public int compare(BluetoothDeviceInfo deviceInfo1, BluetoothDeviceInfo deviceInfo2) {
+                // Compare based on rssi values
+                return Integer.compare( deviceInfo2.getRssi(),deviceInfo1.getRssi());
+            }
+        });
+
+        notifyDataSetChanged();
+    }
+
+    public void sortDeviceListByRssiDescendingWithZeroAtEnd() {
+        Collections.sort(deviceList, new Comparator<BluetoothDeviceInfo>() {
+            @Override
+            public int compare(BluetoothDeviceInfo deviceInfo1, BluetoothDeviceInfo deviceInfo2) {
+                int rssi1 = deviceInfo1.getRssi();
+                int rssi2 = deviceInfo2.getRssi();
+
+                if (rssi1 == 0 && rssi2 == 0) {
+                    // If both have an rssi value of 0, consider them equal
+                    return 0;
+                } else if (rssi1 == 0) {
+                    // If deviceInfo1 has an rssi value of 0, it should appear later
+                    return 1;
+                } else if (rssi2 == 0) {
+                    // If deviceInfo2 has an rssi value of 0, it should appear later
+                    return -1;
+                } else {
+                    // Compare based on rssi values in descending order
+                    return Integer.compare(rssi2, rssi1);
+                }
+            }
+        });
+
+        notifyDataSetChanged();
     }
 
 

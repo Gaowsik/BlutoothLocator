@@ -37,7 +37,7 @@ public class Utils {
     public static List<BluetoothDeviceInfo> getDevices() {
 
 
-        return new ArrayList<>(Arrays.asList(new BluetoothDeviceInfo(new DeviceInfoModel(534, "00000534", "00000534-91D8-4115-BB09-F76BAF6A0E7F", "Office room"),0),new BluetoothDeviceInfo(new DeviceInfoModel(523, "00000523", "00000523-91D8-4115-BB09-F76BAF6A0E7F", "reception"),0), new BluetoothDeviceInfo(new DeviceInfoModel(525, "00000525", "00000525-91D8-4115-BB09-F76BAF6A0E7F", "Lunch room"),0)));
+        return new ArrayList<>(Arrays.asList(new BluetoothDeviceInfo(new DeviceInfoModel(534, "00000534", "00000534-91D8-4115-BB09-F76BAF6A0E7F", "Office room"),0),new BluetoothDeviceInfo(new DeviceInfoModel(523, "00000523", "00000523-91D8-4115-BB09-F76BAF6A0E7F", "reception"),0), new BluetoothDeviceInfo(new DeviceInfoModel(525, "00000525", "00000525-91D8-4115-BB09-F76BAF6A0E7F", "Lunch room"),0),new BluetoothDeviceInfo(new DeviceInfoModel(525, "00000545", "00000525-91D8-4115-BB09-F76BAF6A0ETF", "Balcony"),0)));
     }
 
 

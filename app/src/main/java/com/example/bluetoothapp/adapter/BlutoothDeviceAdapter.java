@@ -118,6 +118,19 @@ public class BlutoothDeviceAdapter extends RecyclerView.Adapter<BlutoothDeviceAd
             notifyDataSetChanged();
         }
 
+    // Custom method to remove an object from the data source
+    public void removeDeviceByName(String deviceNameToRemove) {
+        for (BluetoothDeviceInfo deviceInfo : deviceList) {
+            if (deviceInfo.getDevice().getDeviceName().equals(deviceNameToRemove)) {
+                deviceList.remove(deviceInfo);
+                notifyDataSetChanged();
+                return; // Stop iterating since we found and removed the device
+            }
+        }
+    }
+
+
+
 
     @Override
     public BlutoothDeviceAdapter.BlutoothDeviceViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {

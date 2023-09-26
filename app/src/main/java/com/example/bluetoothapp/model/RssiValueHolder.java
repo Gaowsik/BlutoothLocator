@@ -7,9 +7,12 @@ public class RssiValueHolder {
     List<Integer> rssiValues;
     Integer count;
 
+    Integer missCount;
+
     public RssiValueHolder() {
         this.rssiValues = new ArrayList<>();
         this.count = 0;
+        this.missCount = 0;
     }
 
     public List<Integer> getRssiValues() {
@@ -28,6 +31,8 @@ public class RssiValueHolder {
     public void setCount(Integer count) {
         this.count = count;
     }
+
+    public void setMissCount(Integer missCount){this.missCount = count;}
 
 
 }

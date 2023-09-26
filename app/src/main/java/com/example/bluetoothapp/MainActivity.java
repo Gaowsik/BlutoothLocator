@@ -58,6 +58,8 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
 
     private Map<String, RssiValueHolder> rssiValuesMap;
 
+    private Map<String, Integer> missedValuesMap;
+
     private final long SCAN_INTERVAL = 5000; // 5 seconds
     private final long AVERAGE_INTERVAL = 30000; // 30 second
 
@@ -73,6 +75,35 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
         public void run() {
             // Refresh your data source and notify the adapter
             adapter.refresh();
+
+            for (BluetoothDeviceInfo deviceInfo : getDevices()) {
+                String deviceName = deviceInfo.getDevice().getDeviceName();
+                int rssiValue = rssiValuesMap.get(deviceName).getRssiValues().get(0);
+                // Check if the device name exists as a key in rssiValuesMap
+                if (rssiValuesMap.containsKey(deviceName)) {
+                    // Device name exists, reset missCount to 0
+                    RssiValueHolder rssiValueHolder = rssiValuesMap.get(deviceName);
+                    //    rssiValueHolder.setMissCount(0);
+                    missedValuesMap.put(deviceName, 0);
+
+                } else {
+
+                    Integer currentValue = missedValuesMap.get(deviceName);
+                    if (currentValue != null) {
+                        missedValuesMap.put(deviceName, currentValue + 1);
+                    }
+                    Log.d("MainActi", "miss"+deviceName+" count "+missedValuesMap.get(deviceName));
+                    if (currentValue ==4)
+                    {
+                        adapter.removeDeviceByName(deviceName);
+                        if (deviceInfo!=null){
+
+                        }
+                    }
+
+
+                }
+            }
             Log.d("MainActi", "refresh list");
 
             // Schedule the next refresh after 10 seconds
@@ -169,6 +200,11 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
         textNearByDevice = findViewById(R.id.text_nearby_devices);
         bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
         rssiValuesMap = new HashMap<>();
+        missedValuesMap = new HashMap<>();
+        missedValuesMap.put("00000534", 0);
+        missedValuesMap.put("00000523", 0);
+        missedValuesMap.put("00000525", 0);
+        missedValuesMap.put("00000545", 0);
     }
 
     private void init() {

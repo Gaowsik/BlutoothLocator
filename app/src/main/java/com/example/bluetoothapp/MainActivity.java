@@ -24,6 +24,7 @@ import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -34,6 +35,7 @@ import android.widget.Toast;
 import com.example.bluetoothapp.adapter.BlutoothDeviceAdapter;
 import com.example.bluetoothapp.model.BluetoothDeviceInfo;
 import com.example.bluetoothapp.model.RssiValueHolder;
+import com.example.bluetoothapp.service.BLEScanService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,6 +60,8 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
 
     private Map<String, RssiValueHolder> rssiValuesMap;
 
+    private List<String> currenReadingMap;
+
     private Map<String, Integer> missedValuesMap;
 
     private final long SCAN_INTERVAL = 5000; // 5 seconds
@@ -78,9 +82,8 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
 
             for (BluetoothDeviceInfo deviceInfo : getDevices()) {
                 String deviceName = deviceInfo.getDevice().getDeviceName();
-                int rssiValue = rssiValuesMap.get(deviceName).getRssiValues().get(0);
                 // Check if the device name exists as a key in rssiValuesMap
-                if (rssiValuesMap.containsKey(deviceName)) {
+                if (currenReadingMap.contains(deviceName)) {
                     // Device name exists, reset missCount to 0
                     RssiValueHolder rssiValueHolder = rssiValuesMap.get(deviceName);
                     //    rssiValueHolder.setMissCount(0);
@@ -104,6 +107,8 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
 
                 }
             }
+
+            currenReadingMap.clear();
             Log.d("MainActi", "refresh list");
 
             // Schedule the next refresh after 10 seconds
@@ -131,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
         public void onScanResult(int callbackType, ScanResult result) {
             BluetoothDevice device = result.getDevice();
             String deviceAddress = device.getName();
-
+            currenReadingMap.add(device.getName());
             int rssi = result.getRssi(); //
             // Add the RSSI value to the list associated with this device
             RssiValueHolder rssiValueHolder = rssiValuesMap.get(deviceAddress);
@@ -195,6 +200,7 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
 
     private void initializeVariables() {
         recyclerView = findViewById(R.id.recycle_nearby_div);
+        currenReadingMap = new ArrayList<>();
         adapter = new BlutoothDeviceAdapter(this, this);
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         textNearByDevice = findViewById(R.id.text_nearby_devices);
@@ -336,6 +342,7 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
             }
         }
     }
+
 
 
 }

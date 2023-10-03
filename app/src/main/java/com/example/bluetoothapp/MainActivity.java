@@ -5,6 +5,7 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.Manifest.permission.BLUETOOTH_ADMIN;
 import static android.Manifest.permission.BLUETOOTH_CONNECT;
 import static android.Manifest.permission.BLUETOOTH_SCAN;
+import static android.Manifest.permission.POST_NOTIFICATIONS;
 
 import static com.example.bluetoothapp.Utils.getDevices;
 import static com.example.bluetoothapp.Utils.getNameArea;
@@ -26,6 +27,7 @@ import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -219,6 +221,7 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
         setUpRecyclerView();
         setUpDataToRecyclerview();
         startScanning();
+        startBLEScanService();
 
 
     }
@@ -264,7 +267,9 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
     }
 
     private void requestPermissions() {
-        ActivityCompat.requestPermissions(this, new String[]{BLUETOOTH_SCAN, ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION, BLUETOOTH_ADMIN, BLUETOOTH_CONNECT}, PERMISSION_REQUEST_CODE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            ActivityCompat.requestPermissions(this, new String[]{BLUETOOTH_SCAN, ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION, BLUETOOTH_ADMIN, BLUETOOTH_CONNECT,POST_NOTIFICATIONS}, PERMISSION_REQUEST_CODE);
+        }
     }
 
     // Handle the result of the permission request.
@@ -314,6 +319,9 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
             bluetoothLeScanner.stopScan(scanCallback);
         }
 
+        Intent serviceIntent = new Intent(this, BLEScanService.class);
+        stopService(serviceIntent);
+
     }
 
     @SuppressLint("MissingPermission")
@@ -343,6 +351,11 @@ public class MainActivity extends AppCompatActivity implements BlutoothDeviceAda
         }
     }
 
+
+    private void startBLEScanService() {
+        Intent serviceIntent = new Intent(this, BLEScanService.class);
+        startService(serviceIntent);
+    }
 
 
 }
